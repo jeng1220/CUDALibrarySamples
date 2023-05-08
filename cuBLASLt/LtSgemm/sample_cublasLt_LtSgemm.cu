@@ -44,9 +44,9 @@ void LtSgemm(cublasLtHandle_t ltHandle,
              int n,
              int k,
              const float *alpha, /* host pointer */
-             const float *A,
+             const __nv_bfloat16 *A,
              int lda,
-             const float *B,
+             const __nv_bfloat16 *B,
              int ldb,
              const float *beta, /* host pointer */
              float *C,
@@ -67,8 +67,8 @@ void LtSgemm(cublasLtHandle_t ltHandle,
     checkCublasStatus(cublasLtMatmulDescSetAttribute(operationDesc, CUBLASLT_MATMUL_DESC_TRANSB, &transb, sizeof(transa)));
 
     // create matrix descriptors, we are good with the details here so no need to set any extra attributes
-    checkCublasStatus(cublasLtMatrixLayoutCreate(&Adesc, CUDA_R_32F, transa == CUBLAS_OP_N ? m : k, transa == CUBLAS_OP_N ? k : m, lda));
-    checkCublasStatus(cublasLtMatrixLayoutCreate(&Bdesc, CUDA_R_32F, transb == CUBLAS_OP_N ? k : n, transb == CUBLAS_OP_N ? n : k, ldb));
+    checkCublasStatus(cublasLtMatrixLayoutCreate(&Adesc, CUDA_R_16BF, transa == CUBLAS_OP_N ? m : k, transa == CUBLAS_OP_N ? k : m, lda));
+    checkCublasStatus(cublasLtMatrixLayoutCreate(&Bdesc, CUDA_R_16BF, transb == CUBLAS_OP_N ? k : n, transb == CUBLAS_OP_N ? n : k, ldb));
     checkCublasStatus(cublasLtMatrixLayoutCreate(&Cdesc, CUDA_R_32F, m, n, ldc));
 
     // create preference handle; here we could use extra attributes to disable tensor ops or to make sure algo selected
@@ -101,6 +101,7 @@ void LtSgemm(cublasLtHandle_t ltHandle,
                                      workspace,
                                      workspaceSize,
                                      0));
+    checkCudaStatus(cudaStreamSynchronize(0));
 
     // descriptors are no longer needed as all GPU work was already enqueued
     if (preference) checkCublasStatus(cublasLtMatmulPreferenceDestroy(preference));

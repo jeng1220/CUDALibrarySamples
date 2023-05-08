@@ -27,6 +27,7 @@
  */
 
 #include <cublasLt.h>
+#include <cuda_bf16.h>
 
 /// Sample wrapper executing single precision gemm with cublasLtMatmul, nearly a drop-in replacement for cublasSgemm,
 /// with addition of the workspace to support split-K algorithms
@@ -41,9 +42,9 @@ void LtSgemm(cublasLtHandle_t ltHandle,
              int n,
              int k,
              const float *alpha, /* host pointer */
-             const float *A,
+             const __nv_bfloat16 *A,
              int lda,
-             const float *B,
+             const __nv_bfloat16 *B,
              int ldb,
              const float *beta, /* host pointer */
              float *C,

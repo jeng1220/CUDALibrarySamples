@@ -34,8 +34,15 @@
 #include "sample_cublasLt_LtSgemm.h"
 #include "helpers.h"
 
+template <>
+inline void TestBench<__nv_bfloat16, float, float>::fillData() {
+    for (int i = 0; i < m * k * N; i++) Ahost[i] = __float2bfloat16_rn(i);
+    for (int i = 0; i < n * k * N; i++) Bhost[i] = __float2bfloat16_rn(i);
+    for (int i = 0; i < m * N; i++) biasHost[i] = static_cast<float>(i + 1);
+}
+
 int main() {
-    TestBench<float> props(4, 4, 4, 2.0f, 0.0f);
+    TestBench<__nv_bfloat16, float, float> props(8192, 8192, 8192, 1.0f, 0.0f);
 
     props.run([&props] {
         LtSgemm(props.ltHandle,
